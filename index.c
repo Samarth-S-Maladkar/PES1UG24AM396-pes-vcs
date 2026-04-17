@@ -38,7 +38,18 @@ IndexEntry* index_find(Index *index, const char *path) {
 // Remove a file from the index.
 // Returns 0 on success, -1 if path not in index.
 int index_remove(Index *index, const char *path) {
-   
+    for (int i = 0; i < index->count; i++) {
+        if (strcmp(index->entries[i].path, path) == 0) {
+            int remaining = index->count - i - 1;
+            if (remaining > 0)
+                memmove(&index->entries[i], &index->entries[i + 1],
+                        remaining * sizeof(IndexEntry));
+            index->count--;
+            return index_save(index);
+        }
+    }
+    fprintf(stderr, "error: '%s' is not in the index\n", path);
+    return -1;
 }
 
 // Print the status of the working directory.
